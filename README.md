@@ -38,13 +38,13 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 
 * 딥러닝 스케줄링 (Airflow) 는 차기 버전에서 고려.
 
-| 구성 요소                         | 사용 기술(도구) 후보                        | 최종 선택 기술(도구) | 최종 선택 이유                   |
-|-------------------------------|-------------------------------------|--------------|----------------------------|
-| 딥러닝 모델 학습 진행 상황, 테스트 결과 등 시각화 | **MLflow**<br>KubeFlow<br>SageMaker | **MLflow**   | 오픈소스, Python 통합 쉬움         |
-| 딥러닝 모델 실행 API 서빙              | **FastAPI**<br>Flask<br>Django      | **FastAPI**  | Python 통합 쉬움, 다양한 기능 기본 제공 |
-| 딥러닝 모델 배포/공유/패키징              |                                     |              |                            |
-| 거대 언어 모델 (LLM) 서빙             |                                     |              |                            |
-| AI 에이전트 개발                    |                                     |              |                            |
+| 구성 요소                         | 사용 기술(도구) 후보                        | 최종 선택 기술(도구) | 최종 선택 이유                                   |
+|-------------------------------|-------------------------------------|--------------|--------------------------------------------|
+| 딥러닝 모델 학습 진행 상황, 테스트 결과 등 시각화 | **MLflow**<br>KubeFlow<br>SageMaker | **MLflow**   | 오픈소스, Python 통합 쉬움                         |
+| 딥러닝 모델 실행 API 서빙              | **FastAPI**<br>Flask<br>Django      | **FastAPI**  | Python 통합 쉬움, 다양한 기능 기본 제공                 |
+| 딥러닝 모델 배포/공유/패키징              | **ONNX**                            | **ONNX**     | 다양한 프레임워크 간 모델 교환 포맷으로 대표적인 것은 ONNX가 거의 유일 |
+| 거대 언어 모델 (LLM) 서빙             |                                     |              |                                            |
+| AI 에이전트 개발                    |                                     |              |                                            |
 
 * 핵심 기준
   * **Python 코드 통합이 쉽고 (추가 구성 요소가 불필요하고), 확장성이 뛰어날수록 좋음** ([AI Impact Center](https://github.com/WannaBeSuperteur/ai-impact-center/tree/main) 개발을 위한 베이스라인 코드이므로)
@@ -88,9 +88,10 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 
 ----
 
-**3. 딥러닝 모델 배포/공유/패키징 - ???**
+**3. 딥러닝 모델 배포/공유/패키징 - ONNX**
 
-TBU
+* **다양한 프레임워크 (TensorFlow, PyTorch 등) 간 모델 교환** 포맷으로 대표적인 것은 **ONNX (Open Neural Network Exchange)** 이고, 그 외에 별다른 후보 없음
+* 따라서 딥러닝 모델 배포/공유/패키징 목적으로는 **ONNX 를 사용**
 
 ----
 
