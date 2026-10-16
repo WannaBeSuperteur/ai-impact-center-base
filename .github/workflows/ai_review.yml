@@ -1,0 +1,243 @@
+# Generated most of the code below using ChatGPT-6 Thinking, and human-reviewed
+
+name: AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: ai-pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: AI Code Review
+        env:
+          REVIEW_PR_URL: ${{ secrets.REVIEW_PR_URL }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const sha = pr.head.sha;
+
+            async function leaveComment(body) {
+              return await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body
+              });
+            }
+
+            function normalizeText(value) {
+              if (typeof value === "string") return value;
+              if (value == null) return "";
+
+              try {
+                return JSON.stringify(value, null, 2);
+              } catch {
+                return String(value);
+              }
+            }
+
+            function pickMarbleImage(score, hasAlert, hasManyAlerts) {
+              const base =
+                "https://raw.githubusercontent.com/WannaBeSuperteur/AI_Projects/" +
+                "refs/heads/main/2026_08_28_OhLoRA_Code_Assistant/purple_marble/";
+
+              let number;
+              if (score < 80) {
+                number = 4;
+              } else if (hasManyAlerts || score < 91) {
+                number = 3;
+              } else if (score < 94) {
+                number = 2;
+              } else if (hasAlert || score < 97) {
+                number = 5;
+              } else {
+                number = 1;
+              }
+
+              return `${base}purple_marble_${number}.png`;
+            }
+
+            try {
+              const url = new URL(process.env.REVIEW_PR_URL);
+              url.searchParams.set("commit_hash", sha);
+              url.searchParams.set("pr_number", String(pr.number));
+              url.searchParams.set("base_ref", pr.base.ref);
+              url.searchParams.set("use_llm", "true");
+
+              console.log(`Reviewing PR #${pr.number}`);
+              console.log(`Commit SHA: ${sha}`);
+
+              const { promisify } = require("node:util");
+              const { execFile } = require("node:child_process");
+              const execFileAsync = promisify(execFile);
+              
+              console.log("Starting FastAPI code review...");
+              const startTime = Date.now();
+              
+              const { stdout } = await execFileAsync(
+                "curl",
+                [
+                  "--silent",
+                  "--show-error",
+                  "--fail-with-body",
+                  "--connect-timeout", "20",
+                  "--max-time", "3250",
+                  url.toString()
+                ],
+                {
+                  timeout: 3300000,
+                  maxBuffer: 50 * 1024 * 1024
+                }
+              );
+              console.log(
+                `FastAPI finished in ${((Date.now() - startTime) / 1000).toFixed(1)} seconds`
+              );
+              
+              const result = JSON.parse(stdout);
+              if (!result || typeof result !== "object" || Array.isArray(result)) {
+                throw new Error("Invalid FastAPI response");
+              }
+
+              const latest = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pr.number
+              });
+
+              if (latest.data.head.sha !== sha) {
+                throw new Error(
+                  `PR HEAD changed during review.\nReviewed SHA: ${sha}\n` +
+                  `Latest SHA: ${latest.data.head.sha}`
+                );
+              }
+            
+              if (Object.hasOwn(result, "skipped") && result.skipped === true) {
+                await leaveComment(
+                  "## 👱‍♀️ Oh-LoRA Code Review\n\n" +
+                  "리뷰할 수정 파일이 없어서 코드 리뷰를 건너뛰었습니다. ✨"
+                );
+                console.log("AI Review skipped: no reviewable files.");
+                return;
+              }
+
+              const topItemsEvalSummary = normalizeText(result.top_items_eval_summary);
+              const codeReviewResultDetail = normalizeText(result.code_review_result_str);
+              const llmAnswer = normalizeText(result.llm_answer);
+              const hasAlert = topItemsEvalSummary.includes("🚨");
+              const hasManyAlerts = topItemsEvalSummary.split("🚨").length - 1 >= 3;
+
+              if (
+                result.mean_score == null || result.mean_score === ""
+              ) {
+                throw new Error("mean_score is missing");
+              }
+
+              const score = Number(result.mean_score);
+              if (!Number.isFinite(score)) {
+                throw new Error(
+                  "Invalid mean_score: " + normalizeText(result.mean_score)
+                );
+              }
+
+              const image = pickMarbleImage(score, hasAlert, hasManyAlerts);
+
+              let codeReviewComment = "";
+              if (score < 99 || hasAlert) {
+                codeReviewComment = [
+                  "## 👱‍♀️ Oh-LoRA Code Review Comment",
+                  "",
+                  llmAnswer || "*LLM 코멘트 출력을 사용하지 않았습니다.*"
+                ].join("\n");
+              } else {
+                codeReviewComment = [
+                  "## 👱‍♀️ Oh-LoRA Code Review Comment",
+                  "",
+                  "거의 완벽한 코드! Fix Suggestions에 거의 아무것도 없죠? ✨",
+                  "",
+                  "이대로 반영 가능합니다! 👍"
+                ].join("\n")
+              }
+              await leaveComment(
+                `${codeReviewComment}\n\n` +
+                "## 💯 Oh-LoRA Code Review Score\n\n" +
+                `<img src="${image}" alt="AI Review Result" width="144">\n\n` +
+                `### Score\n**${score.toFixed(1)}** / 100.0\n\n` +
+                `### Urgent\n${topItemsEvalSummary}\n\n` +
+                `### Alert\n${hasAlert ? "🚨 Detected" : "✅ None"}`
+              );
+              await leaveComment(
+                `# 🛠 All Fix Suggestions by Oh-LoRA\n\n${codeReviewResultDetail}`
+              );
+
+              if (hasAlert) {
+                await github.rest.pulls.createReview({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  commit_id: sha,
+                  event: "REQUEST_CHANGES",
+                  body:
+                    "## 🚨 Oh-LoRA Alert — NEEDS WORK 🙋‍♀️\n\n" +
+                    "🛠️ 수정이 필요한 코드가 발견되었습니다. 자세한 것은 위 코멘트를 확인해 주세요!\n\n" +
+                    "지금 이대로는 merge 하기 쪼~끔 어려울 것 같아요."
+                });
+                console.log("REQUEST_CHANGES submitted.");
+              } else {
+                console.log("No critical alerts detected.");
+              }
+              console.log("AI Review completed successfully.");
+
+            } catch (error) {
+              const message = error instanceof Error
+                ? error.message
+                : String(error);
+              console.error("AI Review failed:", message);
+
+              try {
+                await leaveComment(
+                  "## 👱‍♀️ Oh-LoRA Code Review Error\n\n" +
+                  "코드를 리뷰하던 도중 오류가 발생했어요. 😥 아래 내용을 확인해주세요!\n\n" +
+                  "```text\n" + message.replace(/```/g, "'''").slice(0, 2000) + "\n```\n\n" +
+                  `Commit: \`${sha}\`\n\n`
+                );
+              } catch (commentError) {
+                console.error(
+                  "Failed to post error comment:",
+                  commentError
+                );
+              }
+
+              throw error;
+            }
