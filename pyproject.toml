@@ -7,7 +7,7 @@ name = "ai-impact-center-base"
 version = "0.1.0"
 description = "AI Impact Center 를 위한 베이스라인 코드입니다."
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14,<3.15"
 
 dependencies = [
     "numpy>=1.23.5",
