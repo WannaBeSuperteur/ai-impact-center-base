@@ -169,5 +169,8 @@ TBU
 
 ## 5. 향후 추가 작업 (차기 버전 예정)
 
+* Linux OS 지원 및 vLLM 추가 지원 **(우선순위 가장 높음. v1.1 에서 진행)**
+  * Linux OS 는 **WSL `Windows Subsystem for Linux`** 사용 예정
+  * WSL 도입을 통한 **vLLM 추가 지원**
 * ChatGPT로 데이터 생성 시, 데이터 분포의 다양성이 떨어지는 것이 pain point
   * 해당 pain point를 분석 및 해결하는 기능 추가 (사용자 친화를 위해, 캐릭터 기반?)
