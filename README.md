@@ -31,7 +31,7 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 
 * 다음 5가지 도구 도입 예상
   * FastAPI, ONNX, MLflow, vLLM, Airflow
-* 단, Airflow는 현재가 아닌 차기 버전 도입 예정   
+  * 단, Airflow는 현재가 아닌 차기 버전 도입 예정   
 * 프로젝트 조건 고려할 때, 위 기술보다 적절한 기술이 존재하는 경우 해당 기술 사용 가능
 
 ### 1-2. 구성 요소 별 사용 기술/도구 및 이유
