@@ -115,12 +115,12 @@ TBU
 ## 2. 개발 환경
 
 * Python
-  * Python : **Python 3.14.8**
+  * Python : **Python 3.13.16**
   * Dev Tool : PyCharm 2024.1 Community Edition
 * Python Libraries
   * TBU
 * OS & CPU & GPU
-  * OS : **Windows 10**
+  * OS : **Windows 10** (v1.1 버전에서 Linux 지원 및 주 OS를 Linux로 변경 예정)
   * CPU : Intel(R) Xeon(R) CPU E5-2690 0 @ 2.90GHz
   * GPU : **2 x Quadro M6000 (12 GB each), CUDA 12.4 (NVIDIA-SMI 551.61)**
 * 시스템 환경 상세 정보 (TBU)
