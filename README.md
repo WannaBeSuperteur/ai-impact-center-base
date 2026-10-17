@@ -23,14 +23,14 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 | 파이프라인     | 핵심 모델                              | 주요 플로우                                                                        | 구성 요소                                          | 사용 기술/도구          |
 |-----------|------------------------------------|-------------------------------------------------------------------------------|------------------------------------------------|-------------------|
 | 딥러닝 모델 학습 | - Vision 이미지 분류 모델<br>- 임의의 딥러닝 모델 | - **(학습)** 데이터 수집 → 전처리 → 모델 학습 → 테스트 → 모델 저장<br>- **(추론)** 모델 로딩 → inference | - 학습 진행 상황 및 테스트 결과 테이블화<br>- 학습 현황 등 그래프 시각화  | `MLflow`          |
-| LLM 학습    | Causal LLM (Transformers 라이브러리 기반) | - **(학습)** 모델 다운로드 → 모델 학습 → 모델 저장<br>- **(추론)** 모델 로딩 → 언어 생성 → 필터링 → 최종 답변  | - 정량 평가 (BLEU, ROUGE 등)<br>- LLM-as-a-judge 평가 | `Ollama`          |
+| LLM 학습    | Causal LLM (Transformers 라이브러리 기반) | - **(학습)** 모델 다운로드 → 모델 학습 → 모델 저장<br>- **(추론)** 모델 로딩 → 언어 생성 → 필터링 → 최종 답변  | - 정량 평가 (BLEU, ROUGE 등)<br>- LLM-as-a-judge 평가 | `vLLM`            |
 | AI 에이전트   | 에이전틱 AI (Causal LLM 기반)            | - 에이전트 기본 플로우 (HuggingFace 모델 기반)<br>- 도구 호출 (Python 함수 실행)                   | -                                              | `smolagents` (예정) |
 | 기타 모델 학습  | 텍스트 임베딩 모델 (확률 추론, 유사도 비교)         | -                                                                             | - 확률 추론 (확률 예측)<br>- 유사도 비교                    | -                 |
 
 **2. 모델 연계 파이프라인 (배포 등)**
 
 * 다음 5가지 도구 도입 예상
-  * FastAPI, ONNX, MLflow, Ollama, Airflow
+  * FastAPI, ONNX, MLflow, vLLM, Airflow
 * 단, Airflow는 현재가 아닌 차기 버전 도입 예정   
 * 프로젝트 조건 고려할 때, 위 기술보다 적절한 기술이 존재하는 경우 해당 기술 사용 가능
 
@@ -43,7 +43,7 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 | 딥러닝 모델 학습 진행 상황, 테스트 결과 등 시각화 | **MLflow**<br>KubeFlow<br>SageMaker | **MLflow**   | 오픈소스, Python 통합 쉬움                         |
 | 딥러닝 모델 실행 API 서빙              | **FastAPI**<br>Flask<br>Django      | **FastAPI**  | Python 통합 쉬움, 다양한 기능 기본 제공                 |
 | 딥러닝 모델 배포/공유/패키징              | **ONNX**                            | **ONNX**     | 다양한 프레임워크 간 모델 교환 포맷으로 대표적인 것은 ONNX가 거의 유일 |
-| 거대 언어 모델 (LLM) 서빙             | vLLM<br>**Ollama**<br>Triton        | **Ollama**   | 간편한 Python 연동, 추가 구성 요소 불필요                |
+| 거대 언어 모델 (LLM) 서빙             | vLLM<br>**Ollama**<br>Triton        | **vLLM**     | 간편한 Python 연동, 추가 구성 요소 불필요                |
 | AI 에이전트 개발                    |                                     |              |                                            |
 
 * 핵심 기준
@@ -95,16 +95,16 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 
 ----
 
-**4. 거대 언어 모델 (LLM) 서빙 - Ollama**
+**4. 거대 언어 모델 (LLM) 서빙 - vLLM**
 
 | 후보               | vLLM                                       | Ollama                                                             | Triton                             |
 |------------------|--------------------------------------------|--------------------------------------------------------------------|------------------------------------|
 | 오픈소스 여부          | ✅                                          | ✅                                                                  | ✅                                  |
 | Python 코드 통합 난이도 | **매우 쉬움** (`vllm.LLM` 클래스 제공)              | **매우 쉬움** ([공식 라이브러리](https://github.com/ollama/ollama-python) 제공) | **쉬움** (backend 설정 필요)             |
-| 추가 구성 요소 불필요     | ❌ (WSL `Windows Subsystem for Linux` 필요)   | ✅                                                                  | 🟡 (backend 등 설정 필요)               |
+| 추가 구성 요소 불필요     | ✅ (추론 엔진, 서버 기본 제공. 개발 환경에서 이미 WSL 사용)     | ✅                                                                  | 🟡 (backend 등 설정 필요)               |
 | 기능성              | **완벽** (Causal LLM, 양자화, 추론 최적화, 추론 API 등) | **많음** (Causal LLM, 양자화, 추론 API 등)                                 | **많음** (Causal LLM, 양자화, 추론 최적화 등) |
 | 확장성              | **매우 높음** (HuggingFace 연동 등)               | **높음** (다양한 모델, 인프라 연동 가능)                                         | **매우 높음** (다양한 백엔드, 모델 리포지토리 지원)   |
-| 최종 점수            | 16 / 20 (공동 2위)                            | **18 / 20 (1위)**                                                   | 16 / 20 (공동 2위)                    |
+| 최종 점수            | **20 / 20 (1위)**                           | 18 / 20 (2위)                                                       | 16 / 20 (3위)                       |
 
 ----
 
@@ -120,8 +120,8 @@ TBU
 * Python Libraries
   * TBU
 * OS & CPU & GPU
-  * OS : **Windows 10** (v1.1 버전에서 Linux 지원 및 주 OS를 Linux로 변경 예정)
-  * CPU : Intel(R) Xeon(R) CPU E5-2690 0 @ 2.90GHz
+  * OS : **Linux** (TBU)
+  * CPU : (TBU)
   * GPU : **2 x Quadro M6000 (12 GB each), CUDA 12.4 (NVIDIA-SMI 551.61)**
 * 시스템 환경 상세 정보 (TBU)
 
@@ -169,8 +169,5 @@ TBU
 
 ## 5. 향후 추가 작업 (차기 버전 예정)
 
-* Linux OS 지원 및 vLLM 추가 지원 **(우선순위 가장 높음. v1.1 에서 진행)**
-  * Linux OS 는 **WSL `Windows Subsystem for Linux`** 사용 예정
-  * WSL 도입을 통한 **vLLM 추가 지원**
 * ChatGPT로 데이터 생성 시, 데이터 분포의 다양성이 떨어지는 것이 pain point
   * 해당 pain point를 분석 및 해결하는 기능 추가 (사용자 친화를 위해, 캐릭터 기반?)
