@@ -128,8 +128,8 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 * Python Libraries
   * TBU
 * OS & CPU & GPU
-  * OS : **Linux** (TBU)
-  * CPU : (TBU)
+  * OS : **Linux Ubuntu 26.04.1 LTS (Resolute Raccoon)**, using **WSL2** (Windows Subsystem for Linux)
+  * CPU : Intel(R) Xeon(R) CPU E5-2690 0 @ 2.90GHz
   * GPU : **2 x Quadro M6000 (12 GB each), CUDA 12.4 (NVIDIA-SMI 551.61)**
 * 시스템 환경 상세 정보 (TBU)
 
