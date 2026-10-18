@@ -25,8 +25,8 @@ class DeepLearningPipeline:
     def run_test(self) -> dict[Any]:
         raise NotImplementedError
 
-    def run_inference(self, data_to_inference: Any) -> Any:
-        return self.model(data_to_inference)
+    def run_inference(self, data_to_infer: Any) -> Any:
+        return self.model(data_to_infer)
 
     def generate_test_report(self) -> str:
         raise NotImplementedError
