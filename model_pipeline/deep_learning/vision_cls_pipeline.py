@@ -1,13 +1,31 @@
 
-from typing import Any, Type
+import os
+from collections import defaultdict
+from pathlib import Path
+from typing import Any, Type, Callable
 
 import cv2
+import pandas as pd
 import torch
 import torchvision.transforms as transforms
 from datasets import Dataset
 from torch import nn
+from torch.utils.data import DataLoader, random_split
 
 from dl_pipeline import DeepLearningPipeline
+
+
+def category_by_dir_name(dataset_img_path: str) -> str:
+    """Define (annotate) category using image path. (Category = directory name)"""
+
+    return Path(dataset_img_path).parent.name
+
+
+def create_dataset_df(train_data_path: str, category_func: Callable = category_by_dir_name) -> pd.DataFrame:
+    """Create DataFrame for dataset, from given train_data_path."""
+
+    dataset_dict = {'category': [], 'img_path': []}
+    pass  # TODO implement
 
 
 class VisionClsPipeline(DeepLearningPipeline):
@@ -21,9 +39,28 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         super().__init__(dataset, tvt_ratio, model, training_options, trained_model_save_path)
         self.transform = transform
+        self.tvt_dataloader = {'train': None, 'valid': None, 'test': None}
+        self.dataset_size = len(dataset)
 
     def _split_tvt(self) -> None:
-        pass  # TODO implement
+        train_size = int(self.dataset_size * self.tvt_ratio['train'])
+        valid_size = int(self.dataset_size * self.tvt_ratio['valid'])
+        test_size = self.dataset_size - (train_size + valid_size)
+
+        train_dataset, valid_dataset, test_dataset = random_split(self.dataset,
+                                                                  [train_size, valid_size, test_size])
+
+        train_loader = DataLoader(train_dataset,
+                                  batch_size=self.training_options['train_batch_size'],
+                                  shuffle=True)
+        valid_loader = DataLoader(valid_dataset,
+                                  batch_size=self.training_options['valid_batch_size'],
+                                  shuffle=False)
+        test_loader = DataLoader(test_dataset,
+                                 batch_size=self.training_options['test_batch_size'],
+                                 shuffle=False)
+
+        self.tvt_dataloader = {'train': train_loader, 'valid': valid_loader, 'test': test_loader}
 
     def run_train(self) -> None:
         self._split_tvt()
@@ -42,7 +79,7 @@ class VisionClsPipeline(DeepLearningPipeline):
 class VisionClsRunner:
     def __init__(self,
                  train_data_path: str,
-                 train_data_ctg_option: str,
+                 dataset_class: Type[Dataset],
                  tvt_ratio: dict[str, int],
                  model_class: Type[nn],
                  model_name_or_path: str,
@@ -53,7 +90,7 @@ class VisionClsRunner:
                  model_class_kwargs: dict | None = None):
 
         self.train_data_path = train_data_path
-        self.train_data_ctg_option = train_data_ctg_option
+        self.dataset_class = dataset_class
         self.tvt_ratio = tvt_ratio
         self.model_class = model_class
         self.model_name_or_path = model_name_or_path
@@ -85,7 +122,8 @@ class VisionClsRunner:
         return model
 
     def _load_dataset(self) -> Dataset:
-        pass  # TODO implement
+        dataset_df = create_dataset_df(self.train_data_path)
+        return self.dataset_class(dataset_df, self.transform)
 
     def run_model_train(self):
         self.pipeline.run_train()

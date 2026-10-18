@@ -17,7 +17,7 @@
 
 * 입력
   * 학습 데이터 경로
-  * 학습 데이터 카테고리 (디렉토리 이름, 별도 카테고리명 추출 함수)
+  * 데이터셋 생성을 위한 Dataset 클래스
   * Train/Valid/Test 구분 비율
   * 학습할 모델 이름 (`timm` 기반) 또는 학습할 모델이 저장된 경로
   * 학습 옵션 (early stopping, learning rate 등)
