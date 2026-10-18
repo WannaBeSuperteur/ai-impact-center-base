@@ -22,7 +22,11 @@ class VisionClsPipeline(DeepLearningPipeline):
         super().__init__(dataset, tvt_ratio, model, training_options, trained_model_save_path)
         self.transform = transform
 
+    def _split_tvt(self) -> None:
+        pass  # TODO implement
+
     def run_train(self) -> None:
+        self._split_tvt()
         pass  # TODO implement
 
     def run_test(self) -> dict[Any]:

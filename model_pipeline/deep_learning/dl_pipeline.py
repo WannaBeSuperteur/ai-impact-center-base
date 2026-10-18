@@ -19,6 +19,9 @@ class DeepLearningPipeline:
         self.training_options = training_options
         self.trained_model_save_path = trained_model_save_path
 
+    def _split_tvt(self) -> None:
+        raise NotImplementedError
+
     def run_train(self) -> None:
         raise NotImplementedError
 
