@@ -4,6 +4,8 @@ from typing import Any
 import torch.nn as nn
 from torch.utils.data import Dataset
 
+from common import seed_everything
+
 
 class DeepLearningPipeline:
     def __init__(self,
@@ -12,6 +14,8 @@ class DeepLearningPipeline:
                  model: nn,
                  training_options: dict[str, Any],
                  trained_model_save_path: str) -> None:
+
+        seed_everything()
 
         self.dataset = dataset
         self.tvt_ratio = tvt_ratio

@@ -1,6 +1,4 @@
 
-import os
-from collections import defaultdict
 from pathlib import Path
 from typing import Any, Type, Callable
 
@@ -13,6 +11,7 @@ from torch import nn
 from torch.utils.data import DataLoader, random_split
 
 from dl_pipeline import DeepLearningPipeline
+from common import SEED
 
 
 def category_by_dir_name(dataset_img_path: str) -> str:
@@ -47,12 +46,16 @@ class VisionClsPipeline(DeepLearningPipeline):
         valid_size = int(self.dataset_size * self.tvt_ratio['valid'])
         test_size = self.dataset_size - (train_size + valid_size)
 
+        generator = torch.Generator()
+        generator.manual_seed(SEED)
+
         train_dataset, valid_dataset, test_dataset = random_split(self.dataset,
                                                                   [train_size, valid_size, test_size])
 
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.training_options['train_batch_size'],
-                                  shuffle=True)
+                                  shuffle=True,
+                                  generator=generator)
         valid_loader = DataLoader(valid_dataset,
                                   batch_size=self.training_options['valid_batch_size'],
                                   shuffle=False)
