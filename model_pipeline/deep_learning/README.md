@@ -36,7 +36,7 @@
 ## 3. 임의의 딥러닝 모델
 
 * 입력
-  * 학습 데이터셋 (데이터셋 class)
+  * 학습 데이터셋 (데이터셋 instance)
   * Train/Valid/Test 구분 비율
   * 학습할 모델 자체
   * 학습 옵션 (early stopping, learning rate 등)
@@ -50,5 +50,3 @@
   * 모델 inference 로직
   * 모델 성능 평가 결과 markdown 자동 추출 로직
   * (v1.1 예정) 오답을 한 데이터에 대한 markdown 자동 추출 로직
-
-
