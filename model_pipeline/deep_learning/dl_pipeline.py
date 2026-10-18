@@ -1,18 +1,17 @@
 
 from typing import Any
 
-import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 
 
-class DeepLearningModel:
+class DeepLearningPipeline:
     def __init__(self,
                  dataset: Dataset,
                  tvt_ratio: dict[str, int],
                  model: nn,
                  training_options: dict[str, Any],
-                 trained_model_save_path: str):
+                 trained_model_save_path: str) -> None:
 
         self.dataset = dataset
         self.tvt_ratio = tvt_ratio
@@ -29,5 +28,5 @@ class DeepLearningModel:
     def run_inference(self, data_to_inference: Any) -> Any:
         return self.model(data_to_inference)
 
-    def generate_test_report(self):
+    def generate_test_report(self) -> str:
         raise NotImplementedError
