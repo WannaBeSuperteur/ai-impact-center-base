@@ -29,9 +29,9 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 
 **2. 모델 연계 파이프라인 (배포 등)**
 
-* 다음 5가지 도구 도입 예상
-  * FastAPI, ONNX, MLflow, vLLM, Airflow
-  * 단, Airflow는 현재가 아닌 차기 버전 도입 예정   
+* 다음 6가지 도구 도입
+  * FastAPI, ONNX, MLflow, vLLM, Docker, Airflow
+  * 단, Airflow는 현재가 아닌 차기 버전 도입 예정
 * 프로젝트 조건 고려할 때, 위 기술보다 적절한 기술이 존재하는 경우 해당 기술 사용 가능
 
 ### 1-2. 구성 요소 별 사용 기술/도구 및 이유
@@ -156,7 +156,7 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 | 구분      | 계획 내용                                   | 일정                     | branch        | issue / PR                                                                  | 상태 |
 |---------|-----------------------------------------|------------------------|---------------|-----------------------------------------------------------------------------|----|
 | ⚙ 기능 개발 | 딥러닝 (Vision 이미지 분류 + 임의) 모델 학습 파이프라인 개발 | 10.17 토 - 10.18 일 (2d) | `P001-001-dl` | [issue](https://github.com/WannaBeSuperteur/ai-impact-center-base/issues/2) | 💨 |
-| ⚙ 기능 개발 | LLM 학습 파이프라인 개발                         | 10.18 일 (1d)           |               |                                                                             | ⬜  |
+| ⚙ 기능 개발 | LLM 학습 파이프라인 개발                         | 10.19 월 (1d)           |               |                                                                             | ⬜  |
 | ⚙ 기능 개발 | 텍스트 임베딩 모델 학습 파이프라인 개발                  | 10.19 월 (1d)           |               |                                                                             | ⬜  |
 | ⚙ 기능 개발 | AI 에이전트 (smolagents 기반) 파이프라인 개발        | 10.20 화 (1d)           |               |                                                                             | ⬜  |
 | 📃 문서화  | "모델 학습 및 에이전트 파이프라인 개발" 문서화             | 10.20 화 (1d)           |               |                                                                             | ⬜  |
@@ -165,6 +165,7 @@ Baseline Code (Deep Learning, Agentic AI, Pipeline Tools, etc.) for "AI Impact C
 
 | 구분      | 계획 내용                       | 일정           | branch | issue / PR | 상태 |
 |---------|-----------------------------|--------------|--------|------------|----|
+| ⚙ 기능 개발 | Docker 연동                   | 10.21 수 (1d) |        |            | ⬜  |
 | ⚙ 기능 개발 | 표준 서빙 (FastAPI) 개발          | 10.21 수 (1d) |        |            | ⬜  |
 | ⚙ 기능 개발 | 모델 배포/공유 (ONNX) 개발          | 10.21 수 (1d) |        |            | ⬜  |
 | ⚙ 기능 개발 | ML 라이프사이클 관리 (ML flow) 개발   | 10.22 목 (1d) |        |            | ⬜  |
