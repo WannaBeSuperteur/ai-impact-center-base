@@ -60,6 +60,12 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.loss_func = nn.CrossEntropyLoss(reduction='sum')
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+        self._init_val_and_test_result_dict()
+
+    def _init_val_and_test_result_dict(self):
+        self.val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': []}
+        self.test_result = {}
+
     def _split_tvt(self) -> None:
         """Split train, valid, test dataset."""
 
@@ -163,13 +169,13 @@ class VisionClsPipeline(DeepLearningPipeline):
 
     def run_entire_training(self, log_path: str, unsqueeze_label: bool = False) -> nn.Module:
         self._split_tvt()
+        self._init_val_and_test_result_dict()
 
         current_epoch = 0
         min_val_loss_epoch = -1  # Loss-based Early Stopping
         min_val_loss = None
         best_epoch_model = None
         best_epoch_model_val_accuracy = None
-        val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': []}
 
         max_epochs = self.training_options['max_epochs']
         early_stopping_patience = self.training_options['early_stopping_patience']
@@ -181,10 +187,10 @@ class VisionClsPipeline(DeepLearningPipeline):
 
             print(f'epoch={current_epoch}, val_acc={val_accuracy:.6f}, val_loss={val_loss:.6f}')
 
-            val_result_dict['epoch'].append(current_epoch)
-            val_result_dict['val_acc'].append(val_accuracy)
-            val_result_dict['val_loss'].append(val_loss)
-            pd.DataFrame(val_result_dict).to_csv(log_path)
+            self.val_result_dict['epoch'].append(current_epoch)
+            self.val_result_dict['val_acc'].append(val_accuracy)
+            self.val_result_dict['val_loss'].append(val_loss)
+            pd.DataFrame(self.val_result_dict).to_csv(log_path)
 
             # update scheduler
             if self.model.scheduler is not None:
@@ -222,10 +228,10 @@ class VisionClsPipeline(DeepLearningPipeline):
         test_result = self._run_valid_or_test_one_epoch(is_test=True, unsqueeze_label=unsqueeze_label)
         test_accuracy, test_loss = test_result['val_accuracy'], test_result['val_loss']
 
-        val_result_dict['epoch'].append('test')
-        val_result_dict['val_acc'].append(test_accuracy)
-        val_result_dict['val_loss'].append(test_loss)
-        pd.DataFrame(val_result_dict).to_csv(log_path)
+        self.val_result_dict['epoch'].append('test')
+        self.val_result_dict['val_acc'].append(test_accuracy)
+        self.val_result_dict['val_loss'].append(test_loss)
+        pd.DataFrame(self.val_result_dict).to_csv(log_path)
 
         return best_epoch_model
 
