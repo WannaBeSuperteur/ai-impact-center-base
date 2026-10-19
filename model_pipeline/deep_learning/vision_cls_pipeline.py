@@ -161,7 +161,7 @@ class VisionClsPipeline(DeepLearningPipeline):
                 'val_loss': val_loss,
                 'val_result_detail_dict': val_result_detail_dict}
 
-    def run_entire_training(self, unsqueeze_label: bool = False) -> nn.Module:
+    def run_entire_training(self, log_path: str, unsqueeze_label: bool = False) -> nn.Module:
         self._split_tvt()
 
         current_epoch = 0
@@ -169,7 +169,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         min_val_loss = None
         best_epoch_model = None
         best_epoch_model_val_accuracy = None
-        val_loss_list = []
+        val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': []}
 
         max_epochs = self.training_options['max_epochs']
         early_stopping_patience = self.training_options['early_stopping_patience']
@@ -180,7 +180,11 @@ class VisionClsPipeline(DeepLearningPipeline):
             val_accuracy, val_loss = val_result['val_accuracy'], val_result['val_loss']
 
             print(f'epoch={current_epoch}, val_acc={val_accuracy:.6f}, val_loss={val_loss:.6f}')
-            val_loss_list.append(val_loss)
+
+            val_result_dict['epoch'].append(current_epoch)
+            val_result_dict['val_acc'].append(val_accuracy)
+            val_result_dict['val_loss'].append(val_loss)
+            pd.DataFrame(val_result_dict).to_csv(log_path)
 
             # update scheduler
             if self.model.scheduler is not None:
@@ -214,9 +218,15 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         # run test
         print('testing ...')
-        test_result = self._run_valid_or_test_one_epoch(is_test=True, unsqueeze_label=unsqueeze_label)
 
-        # TODO valid, test result logging
+        test_result = self._run_valid_or_test_one_epoch(is_test=True, unsqueeze_label=unsqueeze_label)
+        test_accuracy, test_loss = test_result['val_accuracy'], test_result['val_loss']
+
+        val_result_dict['epoch'].append('test')
+        val_result_dict['val_acc'].append(test_accuracy)
+        val_result_dict['val_loss'].append(test_loss)
+        pd.DataFrame(val_result_dict).to_csv(log_path)
+
         return best_epoch_model
 
     def run_test(self) -> dict:
@@ -291,8 +301,8 @@ class VisionClsRunner:
         dataset_df = create_dataset_df(self.train_data_path)
         return self.dataset_class(dataset_df, self.transform)
 
-    def run_model_train(self):
-        self.pipeline.run_entire_training()
+    def run_model_train(self, log_path: str):
+        self.pipeline.run_entire_training(log_path=log_path)
 
     def run_model_test(self):
         self.pipeline.run_test()

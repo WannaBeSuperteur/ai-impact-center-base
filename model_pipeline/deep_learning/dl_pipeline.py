@@ -32,7 +32,7 @@ class DeepLearningPipeline:
     def _run_valid_or_test_one_epoch(self) -> dict:
         raise NotImplementedError
 
-    def run_entire_training(self) -> None:
+    def run_entire_training(self, log_path: str) -> None:
         raise NotImplementedError
 
     def run_test(self) -> dict:
