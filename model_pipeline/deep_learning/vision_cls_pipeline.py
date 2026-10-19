@@ -54,6 +54,10 @@ class VisionClsPipeline(DeepLearningPipeline):
                  trained_model_save_path: str,
                  transform: transforms.Compose) -> None:
 
+        if not trained_model_save_path.endswith('.pth') and not trained_model_save_path.endswith('.pt'):
+            raise ValueError(
+                "trained_model_save_path must include full model file path, so must be ended with .pth or .pt")
+
         super().__init__(dataset, tvt_ratio, model, training_options, trained_model_save_path)
         self.transform = transform
         self.tvt_dataloader = {}
