@@ -1,4 +1,5 @@
 
+import os
 import copy
 from pathlib import Path
 from typing import Any, Type, Callable
@@ -61,6 +62,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         self._init_val_and_test_result_dict()
+        self.trained_model = None
 
     def _init_val_and_test_result_dict(self):
         self.val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': []}
@@ -233,7 +235,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict['val_loss'].append(test_loss)
         pd.DataFrame(self.val_result_dict).to_csv(log_path)
 
-        return best_epoch_model
+        self.trained_model = best_epoch_model
 
     def run_test(self) -> dict:
         return self._run_valid_or_test_one_epoch(is_test=True)
@@ -245,7 +247,11 @@ class VisionClsPipeline(DeepLearningPipeline):
         pass  # TODO implement
 
     def save_model(self):
-        pass  # TODO implement
+        trained_model_dir = Path(self.trained_model_save_path).parent.name
+        os.makedirs(trained_model_dir, exist_ok=True)
+
+        if self.trained_model is not None:
+            torch.save(self.trained_model.state_dict(), self.trained_model_save_path)
 
 
 class VisionClsRunner:
