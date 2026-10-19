@@ -216,6 +216,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         print('testing ...')
         test_result = self._run_valid_or_test_one_epoch(is_test=True, unsqueeze_label=unsqueeze_label)
 
+        # TODO valid, test result logging
         return best_epoch_model
 
     def run_test(self) -> dict:
@@ -225,6 +226,9 @@ class VisionClsPipeline(DeepLearningPipeline):
         return super().run_inference(data_to_infer)
 
     def generate_test_report(self) -> str:
+        pass  # TODO implement
+
+    def save_model(self):
         pass  # TODO implement
 
 
@@ -303,3 +307,7 @@ class VisionClsRunner:
 
     def generate_model_test_report(self):
         self.model.generate_test_report()
+
+    def save_model(self):
+        self.model.save_model()
+

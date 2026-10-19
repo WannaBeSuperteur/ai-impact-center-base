@@ -43,3 +43,6 @@ class DeepLearningPipeline:
 
     def generate_test_report(self) -> str:
         raise NotImplementedError
+
+    def save_model(self):
+        raise NotImplementedError
