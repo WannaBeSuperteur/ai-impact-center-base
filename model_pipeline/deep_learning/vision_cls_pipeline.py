@@ -72,6 +72,9 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': []}
         self.test_result = {}
 
+    def _split_tvt_using_dir_name(self) -> None:
+
+
     def _split_tvt(self) -> None:
         """Split train, valid, test dataset."""
 
@@ -337,3 +340,11 @@ class VisionClsRunner:
     def save_model(self):
         self.model.save_model()
 
+    def run_all(self, log_path: str):
+        self.run_model_train(log_path)
+        self.run_model_test()
+        self.generate_model_test_report()
+        self.save_model()
+
+
+# TODO: train/valid/test 디렉토리 명시 인식
