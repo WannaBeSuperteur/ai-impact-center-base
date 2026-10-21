@@ -10,7 +10,7 @@ from common import seed_everything
 class DeepLearningPipeline:
     def __init__(self,
                  dataset: Dataset,
-                 tvt_ratio: dict[str, int],
+                 tvt_ratio: dict[str, float],
                  model: nn,
                  training_options: dict[str, Any],
                  trained_model_save_path: str) -> None:

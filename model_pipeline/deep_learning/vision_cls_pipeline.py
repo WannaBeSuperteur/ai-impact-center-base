@@ -48,7 +48,7 @@ def create_dataset_df(train_data_path: str, category_func: Callable = category_b
 class VisionClsPipeline(DeepLearningPipeline):
     def __init__(self,
                  dataset: Dataset,
-                 tvt_ratio: dict[str, int],
+                 tvt_ratio: dict[str, float],
                  model: nn,
                  training_options: dict[str, Any],
                  trained_model_save_path: str,
@@ -73,7 +73,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.test_result = {}
 
     def _split_tvt_using_dir_name(self) -> None:
-
+        pass  # TODO: implement
 
     def _split_tvt(self) -> None:
         """Split train, valid, test dataset."""
@@ -264,8 +264,8 @@ class VisionClsPipeline(DeepLearningPipeline):
 class VisionClsRunner:
     def __init__(self,
                  train_data_path: str,
-                 dataset_class: Type[Dataset],
-                 tvt_ratio: dict[str, int],
+                 dataset_class,
+                 tvt_ratio: dict[str, float],
                  model_class: Type[nn],
                  model_name_or_path: str,
                  training_options: dict[str, Any],
