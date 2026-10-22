@@ -17,6 +17,7 @@ from torch.utils.data import DataLoader, random_split
 
 from deep_learning.dl_pipeline import DeepLearningPipeline
 from deep_learning.common import SEED
+from tqdm import tqdm
 
 
 def category_by_dir_name(dataset_img_path: str) -> str:
@@ -109,7 +110,8 @@ class VisionClsPipeline(DeepLearningPipeline):
         total = 0
         train_loss_sum = 0.0
 
-        for idx, (images, labels) in enumerate(self.tvt_dataloader['train']):
+        pbar = tqdm(enumerate(self.tvt_dataloader['train']), total=len(self.tvt_dataloader['train']))
+        for idx, (images, labels) in pbar:
             images, labels = images.to(self.device), labels.to(self.device).to(torch.float32)
 
             self.model.optimizer.zero_grad()
