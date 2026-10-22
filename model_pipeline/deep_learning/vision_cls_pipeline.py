@@ -130,13 +130,18 @@ class VisionClsPipeline(DeepLearningPipeline):
         train_loss = train_loss_sum / total
         return {'train_loss': train_loss}
 
-    def _run_valid_or_test_one_epoch(self, is_test: bool = False, unsqueeze_label: bool = False) -> dict:
+    def _run_valid_or_test_one_epoch(self,
+                                     is_test: bool = False,
+                                     unsqueeze_label: bool = False,
+                                     model_to_use: nn.Module | None = None) -> dict:
+
         """Run vision classification model validation/test. (one epoch)"""
 
         tvt_name = 'test' if is_test else 'valid'
         loader = self.tvt_dataloader[tvt_name]
+        model = model_to_use if model_to_use is not None else self.model
 
-        self.model.eval()
+        model.eval()
         correct, total = 0, 0
         val_loss_sum = 0
         val_result_detail_dict = {'pred_label': [], 'true_label': []}
@@ -144,7 +149,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         with torch.no_grad():
             for idx, (images, labels) in enumerate(loader):
                 images, labels = images.to(self.device), labels.to(self.device).to(torch.float32)
-                outputs = self.model(images).to(torch.float32)
+                outputs = model(images).to(torch.float32)
 
                 if unsqueeze_label:
                     val_loss_batch = self.loss_func(outputs, labels.unsqueeze(1))
@@ -225,7 +230,8 @@ class VisionClsPipeline(DeepLearningPipeline):
             current_epoch += 1
 
         # assert best epoch model accuracy & loss
-        checked_val_result = self._run_valid_or_test_one_epoch(unsqueeze_label=unsqueeze_label)
+        checked_val_result = self._run_valid_or_test_one_epoch(unsqueeze_label=unsqueeze_label,
+                                                               model_to_use=best_epoch_model)
         checked_val_accuracy, checked_val_loss = checked_val_result['val_accuracy'], checked_val_result['val_loss']
 
         print(f'[best model] val_acc={best_epoch_model_val_accuracy}, val_loss={min_val_loss}')
