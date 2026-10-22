@@ -315,10 +315,12 @@ class VisionClsRunner:
                 model = timm.create_model(self.model_name_or_path,
                                           in_chans=self.training_options['in_chans'],
                                           img_size=(img_height, img_width),
+                                          num_classes=self.training_options['num_classes'],
                                           pretrained=True)
             else:
                 model = timm.create_model(self.model_name_or_path,
                                           in_chans=self.training_options['in_chans'],
+                                          num_classes=self.training_options['num_classes'],
                                           pretrained=True)
 
         model.optimizer = torch.optim.AdamW(model.parameters(), lr=self.training_options['lr'])
