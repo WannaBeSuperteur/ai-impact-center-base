@@ -341,8 +341,8 @@ class VisionClsRunner:
         dataset_df = create_dataset_df(self.train_data_path)
         return self.dataset_class(dataset_df, self.transform)
 
-    def run_model_train(self, log_path: str):
-        self.pipeline.run_entire_training(log_path=log_path)
+    def run_model_train(self, log_path: str, unsqueeze_label: bool = False):
+        self.pipeline.run_entire_training(log_path=log_path, unsqueeze_label=unsqueeze_label)
 
     def run_model_test(self):
         self.pipeline.run_test()
@@ -361,8 +361,8 @@ class VisionClsRunner:
     def save_model(self):
         self.model.save_model()
 
-    def run_all(self, log_path: str):
-        self.run_model_train(log_path)
+    def run_all(self, log_path: str, unsqueeze_label: bool = False):
+        self.run_model_train(log_path, unsqueeze_label=unsqueeze_label)
         self.run_model_test()
         self.generate_model_test_report()
         self.save_model()

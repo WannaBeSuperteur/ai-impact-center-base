@@ -60,7 +60,8 @@ def test_case_1():
                                  training_options=DEFAULT_TRAINING_OPTIONS,
                                  trained_model_save_path='../test_cases/deep_learning_vision_cls_01/trained_model/model.pth',
                                  transform=DEFAULT_TRANSFORM)
-    tc1_runner.run_all(log_path='../test_cases/deep_learning_vision_cls_01/log.csv')
+    tc1_runner.run_all(log_path='../test_cases/deep_learning_vision_cls_01/log.csv',
+                       unsqueeze_label=False)
 
 
 if __name__ == '__main__':
