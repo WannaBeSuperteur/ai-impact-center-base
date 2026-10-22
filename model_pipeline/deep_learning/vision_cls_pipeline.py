@@ -28,18 +28,20 @@ def category_by_dir_name(dataset_img_path: str) -> str:
 def create_dataset_df(train_data_path: str, category_func: Callable = category_by_dir_name) -> pd.DataFrame:
     """Create DataFrame for dataset, from given train_data_path."""
 
-    relative_img_paths = [
-        str(p.relative_to(train_data_path))
-        for p in train_data_path.rglob("*")
-        if p.suffix.lower() in [".jpg", ".jpeg", ".png", ".bmp"]
+    base_path = Path(train_data_path).resolve()
+    valid_extensions = {".jpg", ".jpeg", ".png", ".bmp"}
+
+    absolute_img_paths = [
+        str(p) for p in base_path.rglob("*")
+        if p.suffix.lower() in valid_extensions
     ]
     categories = [
         category_func(img_path)
         for img_path
-        in relative_img_paths
+        in absolute_img_paths
     ]
 
-    dataset_dict = {'category': categories, 'img_path': relative_img_paths}
+    dataset_dict = {'category': categories, 'img_path': absolute_img_paths}
     dataset_df = pd.DataFrame(dataset_dict)
     return dataset_df
 
