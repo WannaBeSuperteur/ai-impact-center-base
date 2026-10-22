@@ -312,6 +312,17 @@ class VisionClsRunner:
             model = timm.create_model(self.model_name_or_path,
                                       pretrained=True)
 
+        model.optimizer = torch.optim.AdamW(model.parameters(), lr=self.training_options['lr'])
+
+        scheduler_type = self.training_options['scheduler_type']
+        if scheduler_type == 'exp':
+            model.scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=model.optimizer,
+                                                                     gamma=self.training_options['gamma'])
+        elif scheduler_type == 'lambda':
+            model.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=model.optimizer,
+                                                                         T_max=self.training_options['t_max'],
+                                                                         eta_min=0)
+
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = model.to(device)
 

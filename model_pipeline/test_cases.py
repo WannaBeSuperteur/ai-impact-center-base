@@ -11,7 +11,9 @@ DEFAULT_TRAINING_OPTIONS = {'train_batch_size': 16,
                             'test_batch_size': 4,
                             'max_epochs': 100,
                             'early_stopping_patience': 10,
-                            'lr': 0.001}
+                            'lr': 0.001,
+                            'scheduler_type': 'exp',
+                            'gamma': 0.95}
 
 DEFAULT_TRANSFORM = transforms.Compose([
     transforms.ToPILImage(),
