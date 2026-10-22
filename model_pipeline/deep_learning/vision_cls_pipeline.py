@@ -15,8 +15,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 from torch import nn
 from torch.utils.data import DataLoader, random_split
 
-from dl_pipeline import DeepLearningPipeline
-from common import SEED
+from deep_learning.dl_pipeline import DeepLearningPipeline
+from deep_learning.common import SEED
 
 
 def category_by_dir_name(dataset_img_path: str) -> str:

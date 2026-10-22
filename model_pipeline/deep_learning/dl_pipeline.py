@@ -4,7 +4,7 @@ from typing import Any
 import torch.nn as nn
 from torch.utils.data import Dataset
 
-from common import seed_everything
+from deep_learning.common import seed_everything
 
 
 class DeepLearningPipeline:
