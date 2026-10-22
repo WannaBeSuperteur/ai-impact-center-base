@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Type, Callable
 
 import cv2
-import device
 import pandas as pd
 import timm
 import torch
@@ -299,7 +298,7 @@ class VisionClsRunner:
                                           trained_model_save_path=self.trained_model_save_path,
                                           transform=self.transform)
 
-    def _load_model(self, device: device, weights_only: bool = True, **kwargs):
+    def _load_model(self, device, weights_only: bool = True, **kwargs):
         """Load vision model from model name (using timm) or path."""
 
         try:
