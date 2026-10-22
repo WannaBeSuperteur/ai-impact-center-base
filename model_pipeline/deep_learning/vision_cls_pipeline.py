@@ -309,8 +309,17 @@ class VisionClsRunner:
                                              map_location=device,
                                              weights_only=weights_only))
         except:
-            model = timm.create_model(self.model_name_or_path,
-                                      pretrained=True)
+            img_height, img_width = self.training_options['img_height'], self.training_options['img_width']
+
+            if img_height is not None and img_width is not None:
+                model = timm.create_model(self.model_name_or_path,
+                                          in_chans=self.training_options['in_chans'],
+                                          img_size=(img_height, img_width),
+                                          pretrained=True)
+            else:
+                model = timm.create_model(self.model_name_or_path,
+                                          in_chans=self.training_options['in_chans'],
+                                          pretrained=True)
 
         model.optimizer = torch.optim.AdamW(model.parameters(), lr=self.training_options['lr'])
 
