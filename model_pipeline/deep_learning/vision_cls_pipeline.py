@@ -203,8 +203,9 @@ class VisionClsPipeline(DeepLearningPipeline):
         cls_report = classification_report(y_true, y_pred)
         cf_matrix = confusion_matrix(y_true, y_pred)
 
-        val_result_detail_df = pd.DataFrame(val_result_detail_dict)
-        val_result_detail_df.to_csv(self.training_options['log_path'])
+        if is_test:
+            val_result_detail_df = pd.DataFrame(val_result_detail_dict)
+            val_result_detail_df.to_csv(self.training_options['inference_log_path'])
 
         return {'cls_report': cls_report,
                 'cf_matrix': cf_matrix,
@@ -237,7 +238,7 @@ class VisionClsPipeline(DeepLearningPipeline):
             self.val_result_dict['val_acc'].append(round(val_accuracy, 4))
             self.val_result_dict['val_loss'].append(round(val_loss, 4))
             self.val_result_dict['torch_memory'].append(torch.cuda.memory_allocated() // 1024)
-            pd.DataFrame(self.val_result_dict).to_csv(self.training_options['log_path'])
+            pd.DataFrame(self.val_result_dict).to_csv(self.training_options['train_log_path'])
 
             # update scheduler
             if self.model.scheduler is not None:
@@ -280,7 +281,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict['val_acc'].append(round(test_accuracy, 4))
         self.val_result_dict['val_loss'].append(round(test_loss, 4))
         self.val_result_dict['torch_memory'].append(torch.cuda.memory_allocated() // 1024)
-        pd.DataFrame(self.val_result_dict).to_csv(self.training_options['log_path'])
+        pd.DataFrame(self.val_result_dict).to_csv(self.training_options['train_log_path'])
 
         print(test_result)
         self.trained_model = best_epoch_model
