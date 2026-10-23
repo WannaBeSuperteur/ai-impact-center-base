@@ -133,6 +133,7 @@ class VisionClsPipeline(DeepLearningPipeline):
     def _run_valid_or_test_one_epoch(self,
                                      is_test: bool = False,
                                      unsqueeze_label: bool = False,
+                                     log_path: str | None = None,
                                      model_to_use: nn.Module | None = None) -> dict:
 
         """Run vision classification model validation/test. (one epoch)"""
@@ -177,6 +178,9 @@ class VisionClsPipeline(DeepLearningPipeline):
         y_pred, y_true = val_result_detail_dict['pred_label'], val_result_detail_dict['true_label']
         cls_report = classification_report(y_true, y_pred)
         cf_matrix = confusion_matrix(y_true, y_pred)
+
+        val_result_detail_df = pd.DataFrame(val_result_detail_dict)
+        val_result_detail_df.to_csv(log_path)
 
         return {'cls_report': cls_report,
                 'cf_matrix': cf_matrix,
@@ -258,8 +262,8 @@ class VisionClsPipeline(DeepLearningPipeline):
         print(test_result)
         self.trained_model = best_epoch_model
 
-    def run_test(self) -> dict:
-        return self._run_valid_or_test_one_epoch(is_test=True)
+    def run_test(self, log_path: str) -> dict:
+        return self._run_valid_or_test_one_epoch(is_test=True, log_path=log_path)
 
     def run_inference(self, data_to_infer: Any) -> Any:
         return super().run_inference(data_to_infer)
@@ -361,8 +365,8 @@ class VisionClsRunner:
     def run_model_train(self, log_path: str, unsqueeze_label: bool = False):
         self.pipeline.run_entire_training(log_path=log_path, unsqueeze_label=unsqueeze_label)
 
-    def run_model_test(self):
-        self.pipeline.run_test()
+    def run_model_test(self, log_path: str):
+        self.pipeline.run_test(log_path)
 
     def run_model_inference(self, data_to_infer: Any):
         return self.pipeline.run_inference(data_to_infer)
@@ -378,9 +382,9 @@ class VisionClsRunner:
     def save_model(self):
         self.model.save_model()
 
-    def run_all(self, log_path: str, unsqueeze_label: bool = False):
-        self.run_model_train(log_path, unsqueeze_label=unsqueeze_label)
-        self.run_model_test()
+    def run_all(self, train_log_path: str, inference_log_path: str, unsqueeze_label: bool = False):
+        self.run_model_train(log_path=train_log_path, unsqueeze_label=unsqueeze_label)
+        self.run_model_test(log_path=inference_log_path)
         self.generate_model_test_report()
         self.save_model()
 
