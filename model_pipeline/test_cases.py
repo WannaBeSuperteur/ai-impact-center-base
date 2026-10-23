@@ -49,7 +49,7 @@ class DefaultClassificationDataset(Dataset):
         label_int = self.label_mapping[label]
         label_one_hot = np.eye(len(self.label_list))[label_int]
 
-        return img, label_one_hot
+        return {'img_path': img_path, 'img': img, 'label': label_one_hot}
 
 
 def test_case_1():

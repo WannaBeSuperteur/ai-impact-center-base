@@ -111,7 +111,8 @@ class VisionClsPipeline(DeepLearningPipeline):
         train_loss_sum = 0.0
 
         pbar = tqdm(enumerate(self.tvt_dataloader['train']), total=len(self.tvt_dataloader['train']))
-        for idx, (images, labels) in pbar:
+        for idx, data in pbar:
+            images, labels = data['img'], data['label']
             images, labels = images.to(self.device), labels.to(self.device).to(torch.float32)
 
             self.model.optimizer.zero_grad()
@@ -148,7 +149,8 @@ class VisionClsPipeline(DeepLearningPipeline):
         val_result_detail_dict = {'pred_label': [], 'true_label': []}
 
         with torch.no_grad():
-            for idx, (images, labels) in enumerate(loader):
+            for idx, data in enumerate(loader):
+                images, labels = data['img'], data['label']
                 images, labels = images.to(self.device), labels.to(self.device).to(torch.float32)
                 outputs = model(images).to(torch.float32)
 
