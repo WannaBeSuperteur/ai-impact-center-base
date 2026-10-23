@@ -156,7 +156,6 @@ class VisionClsPipeline(DeepLearningPipeline):
 
     def _run_valid_or_test_one_epoch(self,
                                      is_test: bool = False,
-                                     log_path: str | None = None,
                                      model_to_use: nn.Module | None = None) -> dict:
 
         """Run vision classification model validation/test. (one epoch)"""
@@ -205,7 +204,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         cf_matrix = confusion_matrix(y_true, y_pred)
 
         val_result_detail_df = pd.DataFrame(val_result_detail_dict)
-        val_result_detail_df.to_csv(log_path)
+        val_result_detail_df.to_csv(self.training_options['log_path'])
 
         return {'cls_report': cls_report,
                 'cf_matrix': cf_matrix,
@@ -213,8 +212,8 @@ class VisionClsPipeline(DeepLearningPipeline):
                 'val_loss': val_loss,
                 'val_result_detail_dict': val_result_detail_dict}
 
-    def run_entire_training(self, log_path: str) -> nn.Module:
-        self._create_dataloader_of_tvt(tvt_split_by_dir)
+    def run_entire_training(self) -> nn.Module:
+        self._create_dataloader_of_tvt()
         self._init_val_and_test_result_dict()
 
         current_epoch = 0
@@ -238,7 +237,7 @@ class VisionClsPipeline(DeepLearningPipeline):
             self.val_result_dict['val_acc'].append(round(val_accuracy, 4))
             self.val_result_dict['val_loss'].append(round(val_loss, 4))
             self.val_result_dict['torch_memory'].append(torch.cuda.memory_allocated() // 1024)
-            pd.DataFrame(self.val_result_dict).to_csv(log_path)
+            pd.DataFrame(self.val_result_dict).to_csv(self.training_options['log_path'])
 
             # update scheduler
             if self.model.scheduler is not None:
@@ -281,13 +280,13 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict['val_acc'].append(round(test_accuracy, 4))
         self.val_result_dict['val_loss'].append(round(test_loss, 4))
         self.val_result_dict['torch_memory'].append(torch.cuda.memory_allocated() // 1024)
-        pd.DataFrame(self.val_result_dict).to_csv(log_path)
+        pd.DataFrame(self.val_result_dict).to_csv(self.training_options['log_path'])
 
         print(test_result)
         self.trained_model = best_epoch_model
 
-    def run_test(self, log_path: str) -> dict:
-        return self._run_valid_or_test_one_epoch(is_test=True, log_path=log_path)
+    def run_test(self) -> dict:
+        return self._run_valid_or_test_one_epoch(is_test=True)
 
     def run_inference(self, data_to_infer: Any) -> Any:
         return super().run_inference(data_to_infer)
@@ -386,11 +385,11 @@ class VisionClsRunner:
         dataset_df = create_dataset_df(self.train_data_path)
         return self.dataset_class(dataset_df, self.transform)
 
-    def run_model_train(self, log_path: str):
-        self.pipeline.run_entire_training(log_path=log_path)
+    def run_model_train(self):
+        self.pipeline.run_entire_training()
 
-    def run_model_test(self, log_path: str):
-        self.pipeline.run_test(log_path)
+    def run_model_test(self):
+        self.pipeline.run_test()
 
     def run_model_inference(self, data_to_infer: Any):
         return self.pipeline.run_inference(data_to_infer)
@@ -406,9 +405,9 @@ class VisionClsRunner:
     def save_model(self):
         self.model.save_model()
 
-    def run_all(self, train_log_path: str, inference_log_path: str):
-        self.run_model_train(log_path=train_log_path)
-        self.run_model_test(log_path=inference_log_path)
+    def run_all(self):
+        self.run_model_train()
+        self.run_model_test()
         self.generate_model_test_report()
         self.save_model()
 

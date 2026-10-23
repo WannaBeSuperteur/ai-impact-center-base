@@ -55,17 +55,19 @@ class DefaultClassificationDataset(Dataset):
 
 
 def test_case_1():
+    training_options = DEFAULT_TRAINING_OPTIONS
+    training_options['train_log_path'] = '../test_cases/deep_learning_vision_cls_01/train_log.csv'
+    training_options['inference_log_path'] = '../test_cases/deep_learning_vision_cls_01/inference_log.csv'
+
     tc1_runner = VisionClsRunner(train_data_path='../test_cases/deep_learning_vision_cls_01/archive/mnist_sample',
                                  dataset_class=DefaultClassificationDataset,
                                  tvt_ratio={'train': 0.75, 'valid': 0.15, 'test': 0.1},
                                  model_class=None,
                                  model_name_or_path='resnet18',
-                                 training_options=DEFAULT_TRAINING_OPTIONS,
+                                 training_options=training_options,
                                  trained_model_save_path='../test_cases/deep_learning_vision_cls_01/trained_model/model.pth',
                                  transform=DEFAULT_TRANSFORM)
-    tc1_runner.run_all(train_log_path='../test_cases/deep_learning_vision_cls_01/train_log.csv',
-                       inference_log_path='../test_cases/deep_learning_vision_cls_01/inference_log.csv',
-                       unsqueeze_label=False)
+    tc1_runner.run_all()
 
 
 if __name__ == '__main__':
