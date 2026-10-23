@@ -16,7 +16,7 @@ from torch import nn
 from torch.utils.data import DataLoader, random_split
 
 from deep_learning.dl_pipeline import DeepLearningPipeline
-from deep_learning.common import SEED
+from deep_learning.common import SEED, seed_everything
 from tqdm import tqdm
 
 
@@ -287,6 +287,8 @@ class VisionClsRunner:
                  transform: transforms.Compose,
                  load_model_weights_only: bool = True,
                  model_class_kwargs: dict | None = None):
+
+        seed_everything()
 
         self.train_data_path = train_data_path
         self.dataset_class = dataset_class
