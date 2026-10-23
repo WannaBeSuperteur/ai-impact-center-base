@@ -71,7 +71,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.trained_model = None
 
     def _init_val_and_test_result_dict(self):
-        self.val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': []}
+        self.val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': [], 'torch_memory': []}
         self.test_result = {}
 
     def _split_tvt_using_dir_name(self) -> None:
@@ -208,6 +208,7 @@ class VisionClsPipeline(DeepLearningPipeline):
             self.val_result_dict['epoch'].append(current_epoch)
             self.val_result_dict['val_acc'].append(round(val_accuracy, 4))
             self.val_result_dict['val_loss'].append(round(val_loss, 4))
+            self.val_result_dict['torch_memory'].append(torch.cuda.memory_allocated() // 1024)
             pd.DataFrame(self.val_result_dict).to_csv(log_path)
 
             # update scheduler
@@ -251,6 +252,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict['epoch'].append('test')
         self.val_result_dict['val_acc'].append(round(test_accuracy, 4))
         self.val_result_dict['val_loss'].append(round(test_loss, 4))
+        self.val_result_dict['torch_memory'].append(torch.cuda.memory_allocated() // 1024)
         pd.DataFrame(self.val_result_dict).to_csv(log_path)
 
         print(test_result)
