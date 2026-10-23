@@ -74,21 +74,41 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': [], 'torch_memory': []}
         self.test_result = {}
 
-    def _split_tvt_using_dir_name(self) -> None:
-        pass  # TODO: implement
-
-    def _split_tvt(self) -> None:
+    def _split_tvt(self, tvt_split_by_dir: bool = False) -> tuple[Any]:
         """Split train, valid, test dataset."""
 
-        train_size = int(self.dataset_size * self.tvt_ratio['train'])
-        valid_size = int(self.dataset_size * self.tvt_ratio['valid'])
-        test_size = self.dataset_size - (train_size + valid_size)
+        if tvt_split_by_dir:
+            train_dataset = []
+            valid_dataset = []
+            test_dataset = []
+
+            for data in self.dataset:
+                path = data['img_path']
+                if '/train/' in path:
+                    train_dataset.append(data)
+                elif '/valid/' in path:
+                    valid_dataset.append(data)
+                elif '/test/' in path:
+                    test_dataset.append(data)
+
+        else:
+            train_dataset, valid_dataset, test_dataset = random_split(self.dataset,
+                                                                      [self.train_size,
+                                                                       self.valid_size,
+                                                                       self.test_size])
+
+        return train_dataset, valid_dataset, test_dataset
+
+    def _create_dataloader_of_tvt(self, tvt_split_by_dir: bool = False) -> None:
+        """Create DataLoader for train, valid, test dataset."""
+
+        self.train_size = int(self.dataset_size * self.tvt_ratio['train'])
+        self.valid_size = int(self.dataset_size * self.tvt_ratio['valid'])
+        self.test_size = self.dataset_size - (self.train_size + self.valid_size)
 
         generator = torch.Generator()
         generator.manual_seed(SEED)
-
-        train_dataset, valid_dataset, test_dataset = random_split(self.dataset,
-                                                                  [train_size, valid_size, test_size])
+        train_dataset, valid_dataset, test_dataset = self._split_tvt(tvt_split_by_dir)
 
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.training_options['train_batch_size'],
@@ -190,8 +210,8 @@ class VisionClsPipeline(DeepLearningPipeline):
                 'val_loss': val_loss,
                 'val_result_detail_dict': val_result_detail_dict}
 
-    def run_entire_training(self, log_path: str, unsqueeze_label: bool = False) -> nn.Module:
-        self._split_tvt()
+    def run_entire_training(self, log_path: str, unsqueeze_label: bool = False, tvt_split_by_dir: bool = False) -> nn.Module:
+        self._create_dataloader_of_tvt(tvt_split_by_dir)
         self._init_val_and_test_result_dict()
 
         current_epoch = 0
@@ -390,5 +410,3 @@ class VisionClsRunner:
         self.generate_model_test_report()
         self.save_model()
 
-
-# TODO: train/valid/test 디렉토리 명시 인식
