@@ -168,8 +168,8 @@ class VisionClsPipeline(DeepLearningPipeline):
                 labels_ = list(labels.detach().cpu().numpy())
 
                 for pred, label in zip(predicted_, labels_):
-                    val_result_detail_dict['pred_label'].append(pred)
-                    val_result_detail_dict['true_label'].append(label)
+                    val_result_detail_dict['pred_label'].append(int(pred))
+                    val_result_detail_dict['true_label'].append(int(label))
 
             val_accuracy = correct / total
             val_loss = val_loss_sum / total
@@ -201,12 +201,13 @@ class VisionClsPipeline(DeepLearningPipeline):
             self._run_train_one_epoch(unsqueeze_label=unsqueeze_label)
             val_result = self._run_valid_or_test_one_epoch(unsqueeze_label=unsqueeze_label)
             val_accuracy, val_loss = val_result['val_accuracy'], val_result['val_loss']
+            val_loss = float(val_loss.detach().cpu())
 
             print(f'epoch={current_epoch}, val_acc={val_accuracy:.6f}, val_loss={val_loss:.6f}')
 
             self.val_result_dict['epoch'].append(current_epoch)
-            self.val_result_dict['val_acc'].append(val_accuracy)
-            self.val_result_dict['val_loss'].append(val_loss)
+            self.val_result_dict['val_acc'].append(round(val_accuracy, 4))
+            self.val_result_dict['val_loss'].append(round(val_loss, 4))
             pd.DataFrame(self.val_result_dict).to_csv(log_path)
 
             # update scheduler
@@ -245,12 +246,14 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         test_result = self._run_valid_or_test_one_epoch(is_test=True, unsqueeze_label=unsqueeze_label)
         test_accuracy, test_loss = test_result['val_accuracy'], test_result['val_loss']
+        test_loss = float(test_loss.detach().cpu())
 
         self.val_result_dict['epoch'].append('test')
-        self.val_result_dict['val_acc'].append(test_accuracy)
-        self.val_result_dict['val_loss'].append(test_loss)
+        self.val_result_dict['val_acc'].append(round(test_accuracy, 4))
+        self.val_result_dict['val_loss'].append(round(test_loss, 4))
         pd.DataFrame(self.val_result_dict).to_csv(log_path)
 
+        print(test_result)
         self.trained_model = best_epoch_model
 
     def run_test(self) -> dict:
