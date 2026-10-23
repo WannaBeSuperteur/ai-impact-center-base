@@ -17,7 +17,9 @@ DEFAULT_TRAINING_OPTIONS = {'train_batch_size': 16,
                             'img_height': None,
                             'img_width': None,
                             'in_chans': 1,
-                            'num_classes': 2}
+                            'num_classes': 2,
+                            'unsqueeze_label': False,
+                            'tvt_split_by_dir': False}
 
 DEFAULT_TRANSFORM = transforms.Compose([
     transforms.ToPILImage(),

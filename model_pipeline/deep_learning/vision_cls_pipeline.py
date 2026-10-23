@@ -74,8 +74,10 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict = {'epoch': [], 'val_acc': [], 'val_loss': [], 'torch_memory': []}
         self.test_result = {}
 
-    def _split_tvt(self, tvt_split_by_dir: bool = False) -> tuple[Any]:
+    def _split_tvt(self) -> tuple[Any]:
         """Split train, valid, test dataset."""
+
+        tvt_split_by_dir = self.training_options['tvt_split_by_dir']
 
         if tvt_split_by_dir:
             train_dataset = []
@@ -99,7 +101,7 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         return train_dataset, valid_dataset, test_dataset
 
-    def _create_dataloader_of_tvt(self, tvt_split_by_dir: bool = False) -> None:
+    def _create_dataloader_of_tvt(self) -> None:
         """Create DataLoader for train, valid, test dataset."""
 
         self.train_size = int(self.dataset_size * self.tvt_ratio['train'])
@@ -108,7 +110,7 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         generator = torch.Generator()
         generator.manual_seed(SEED)
-        train_dataset, valid_dataset, test_dataset = self._split_tvt(tvt_split_by_dir)
+        train_dataset, valid_dataset, test_dataset = self._split_tvt()
 
         train_loader = DataLoader(train_dataset,
                                   batch_size=self.training_options['train_batch_size'],
@@ -123,12 +125,13 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         self.tvt_dataloader = {'train': train_loader, 'valid': valid_loader, 'test': test_loader}
 
-    def _run_train_one_epoch(self, unsqueeze_label: bool = False) -> dict:
+    def _run_train_one_epoch(self) -> dict:
         """Run vision classification model training. (one epoch)"""
 
         self.model.train()
         total = 0
         train_loss_sum = 0.0
+        unsqueeze_label = self.training_options['unsqueeze_label']
 
         pbar = tqdm(enumerate(self.tvt_dataloader['train']), total=len(self.tvt_dataloader['train']))
         for idx, data in pbar:
@@ -153,13 +156,13 @@ class VisionClsPipeline(DeepLearningPipeline):
 
     def _run_valid_or_test_one_epoch(self,
                                      is_test: bool = False,
-                                     unsqueeze_label: bool = False,
                                      log_path: str | None = None,
                                      model_to_use: nn.Module | None = None) -> dict:
 
         """Run vision classification model validation/test. (one epoch)"""
 
         tvt_name = 'test' if is_test else 'valid'
+        unsqueeze_label = self.training_options['unsqueeze_label']
         loader = self.tvt_dataloader[tvt_name]
         model = model_to_use if model_to_use is not None else self.model
 
@@ -210,7 +213,7 @@ class VisionClsPipeline(DeepLearningPipeline):
                 'val_loss': val_loss,
                 'val_result_detail_dict': val_result_detail_dict}
 
-    def run_entire_training(self, log_path: str, unsqueeze_label: bool = False, tvt_split_by_dir: bool = False) -> nn.Module:
+    def run_entire_training(self, log_path: str) -> nn.Module:
         self._create_dataloader_of_tvt(tvt_split_by_dir)
         self._init_val_and_test_result_dict()
 
@@ -224,8 +227,8 @@ class VisionClsPipeline(DeepLearningPipeline):
         early_stopping_patience = self.training_options['early_stopping_patience']
 
         while True:
-            self._run_train_one_epoch(unsqueeze_label=unsqueeze_label)
-            val_result = self._run_valid_or_test_one_epoch(unsqueeze_label=unsqueeze_label)
+            self._run_train_one_epoch()
+            val_result = self._run_valid_or_test_one_epoch()
             val_accuracy, val_loss = val_result['val_accuracy'], val_result['val_loss']
             val_loss = float(val_loss.detach().cpu())
 
@@ -258,8 +261,7 @@ class VisionClsPipeline(DeepLearningPipeline):
             current_epoch += 1
 
         # assert best epoch model accuracy & loss
-        checked_val_result = self._run_valid_or_test_one_epoch(unsqueeze_label=unsqueeze_label,
-                                                               model_to_use=best_epoch_model)
+        checked_val_result = self._run_valid_or_test_one_epoch(model_to_use=best_epoch_model)
         checked_val_accuracy, checked_val_loss = checked_val_result['val_accuracy'], checked_val_result['val_loss']
 
         print(f'[best model] val_acc={best_epoch_model_val_accuracy}, val_loss={min_val_loss}')
@@ -271,7 +273,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         # run test
         print('testing ...')
 
-        test_result = self._run_valid_or_test_one_epoch(is_test=True, unsqueeze_label=unsqueeze_label)
+        test_result = self._run_valid_or_test_one_epoch(is_test=True)
         test_accuracy, test_loss = test_result['val_accuracy'], test_result['val_loss']
         test_loss = float(test_loss.detach().cpu())
 
@@ -384,8 +386,8 @@ class VisionClsRunner:
         dataset_df = create_dataset_df(self.train_data_path)
         return self.dataset_class(dataset_df, self.transform)
 
-    def run_model_train(self, log_path: str, unsqueeze_label: bool = False):
-        self.pipeline.run_entire_training(log_path=log_path, unsqueeze_label=unsqueeze_label)
+    def run_model_train(self, log_path: str):
+        self.pipeline.run_entire_training(log_path=log_path)
 
     def run_model_test(self, log_path: str):
         self.pipeline.run_test(log_path)
@@ -404,8 +406,8 @@ class VisionClsRunner:
     def save_model(self):
         self.model.save_model()
 
-    def run_all(self, train_log_path: str, inference_log_path: str, unsqueeze_label: bool = False):
-        self.run_model_train(log_path=train_log_path, unsqueeze_label=unsqueeze_label)
+    def run_all(self, train_log_path: str, inference_log_path: str):
+        self.run_model_train(log_path=train_log_path)
         self.run_model_test(log_path=inference_log_path)
         self.generate_model_test_report()
         self.save_model()
