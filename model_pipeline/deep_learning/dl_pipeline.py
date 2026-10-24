@@ -1,0 +1,44 @@
+
+from typing import Any
+
+import torch.nn as nn
+from torch.utils.data import Dataset
+
+
+class DeepLearningPipeline:
+    def __init__(self,
+                 dataset: Dataset,
+                 tvt_ratio: dict[str, float],
+                 model: nn,
+                 training_options: dict[str, Any],
+                 trained_model_save_path: str) -> None:
+
+        self.dataset = dataset
+        self.tvt_ratio = tvt_ratio
+        self.model = model
+        self.training_options = training_options
+        self.trained_model_save_path = trained_model_save_path
+
+    def _split_tvt(self) -> None:
+        raise NotImplementedError
+
+    def _run_train_one_epoch(self) -> dict:
+        raise NotImplementedError
+
+    def _run_valid_or_test_one_epoch(self) -> dict:
+        raise NotImplementedError
+
+    def run_entire_training(self, log_path: str) -> None:
+        raise NotImplementedError
+
+    def run_test(self) -> dict:
+        raise NotImplementedError
+
+    def run_inference(self, data_to_infer: Any) -> Any:
+        return self.model(data_to_infer)
+
+    def generate_test_report(self) -> str:
+        raise NotImplementedError
+
+    def save_model(self):
+        raise NotImplementedError

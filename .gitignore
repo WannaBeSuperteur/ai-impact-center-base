@@ -1,2 +1,6 @@
 .idea
 ai_impact_center_base.egg-info
+test_cases
+test_cases/*
+*/**/__pycache__
+*/**/__pycache__/
