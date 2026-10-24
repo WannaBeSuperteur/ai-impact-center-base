@@ -276,7 +276,6 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         test_result = self._run_valid_or_test_one_epoch(is_test=True)
         test_accuracy, test_loss = test_result['val_accuracy'], test_result['val_loss']
-        print(test_result)
 
         self.val_result_dict['epoch'].append('test')
         self.val_result_dict['val_acc'].append(round(test_accuracy, 4))
@@ -294,7 +293,64 @@ class VisionClsPipeline(DeepLearningPipeline):
         return super().run_inference(data_to_infer)
 
     def generate_test_report(self) -> str:
-        pass  # TODO implement
+        """
+        Generate test report for below:
+        - TP, TN, FP, FN, precision, recall, F1 score, accuracy for each class
+        - accuracy for all test dataset
+        """
+
+        cf_matrix = np.array(result_dict['cf_matrix'])
+        total_samples = np.sum(cf_matrix)
+
+        total_correct = np.trace(cf_matrix)
+        accuracy = total_correct / total_samples if total_samples > 0 else 0.0
+
+        md_report = f"# Test Dataset Report\n\n"
+
+        md_report += f"## Table of Contents\n"
+        md_report += f"* [1. Summary](1. Summary)\n"
+        md_report += f"* [2. Details for each class](2. Details for each class)\n"
+        md_report += f"* [3. Log files](3. Log files)\n\n"
+
+        md_report += f"## 1. Summary\n"
+        md_report += f"* **total sample count :** {total_samples} 개\n"
+        md_report += f"* **total accuracy     :** {accuracy:.4f} ({total_correct}/{total_samples})\n\n"
+
+        md_report += f"## 2. Details for each class\n"
+        md_report += "| Class | TP | TN | FP | FN | Precision | Recall | F1-Score |\n"
+        md_report += "| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n"
+
+        for i in range(num_classes):
+            tp = cf_matrix[i, i]
+            fn = np.sum(cf_matrix[i, :]) - tp
+            fp = np.sum(cf_matrix[:, i]) - tp
+            tn = total_samples - (tp + fp + fn)
+
+            precision_val = tp / (tp + fp) if (tp + fp) > 0 else "-"
+            recall_val = tp / (tp + fn) if (tp + fn) > 0 else "-"
+
+            if isinstance(precision_val, float) and isinstance(recall_val, float):
+                if (precision_val + recall_val) > 0:
+                    f1_val = 2 * (precision_val * recall_val) / (precision_val + recall_val)
+                else:
+                    f1_val = "-"
+            else:
+                f1_val = "-"
+
+            p_str = f"{precision_val:.4f}" if isinstance(precision_val, float) else precision_val
+            r_str = f"{recall_val:.4f}" if isinstance(recall_val, float) else recall_val
+            f_str = f"{f1_val:.4f}" if isinstance(f1_val, float) else f1_val
+
+            md_report += f"| **Class {i}** | {tp} | {tn} | {fp} | {fn} | {p_str} | {r_str} | {f_str} |\n"
+
+        train_log_path = self.training_options['train_log_path']
+        inference_log_path = self.training_options['inference_log_path']
+        train_log_name = Path(train_log_path).name
+        inference_log_name = Path(inference_log_path).name
+
+        md_report += f"## 3. Log files\n"
+        md_report += f"- train log: [{train_log_name}]({train_log_name})\n"
+        md_report += f"- inference log: [{inference_log_name}]({inference_log_name})\n"
 
     def save_model(self):
         trained_model_dir = Path(self.trained_model_save_path).parent.name
