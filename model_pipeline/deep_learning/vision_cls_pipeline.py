@@ -310,13 +310,13 @@ class VisionClsPipeline(DeepLearningPipeline):
         md_report = f"# Test Dataset Report\n\n"
 
         md_report += f"## Table of Contents\n"
-        md_report += f"* [1. Summary](1. Summary)\n"
-        md_report += f"* [2. Details for each class](2. Details for each class)\n"
-        md_report += f"* [3. Log files](3. Log files)\n\n"
+        md_report += f"* [1. Summary](#1-summary)\n"
+        md_report += f"* [2. Details for each class](#2-details-for-each-class)\n"
+        md_report += f"* [3. Log files](#3-log-files)\n\n"
 
         md_report += f"## 1. Summary\n"
         md_report += f"* **total sample count :** {total_samples} 개\n"
-        md_report += f"* **total accuracy     :** {accuracy:.4f} ({total_correct}/{total_samples})\n\n"
+        md_report += f"* **total accuracy     :** {accuracy:.4f} ({total_correct} / {total_samples})\n\n"
 
         md_report += f"## 2. Details for each class\n"
         md_report += "| Class | TP | TN | FP | FN | Precision | Recall | F1-Score |\n"
@@ -344,6 +344,7 @@ class VisionClsPipeline(DeepLearningPipeline):
             f_str = f"{f1_val:.4f}" if isinstance(f1_val, float) else f1_val
 
             md_report += f"| **Class {i}** | {tp} | {tn} | {fp} | {fn} | {p_str} | {r_str} | {f_str} |\n"
+        md_report += "\n"
 
         train_log_path = self.training_options['train_log_path']
         inference_log_path = self.training_options['inference_log_path']
@@ -357,7 +358,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         return md_report
 
     def save_model(self):
-        trained_model_dir = Path(self.trained_model_save_path).parent.name
+        trained_model_dir = Path(self.trained_model_save_path).parent
         os.makedirs(trained_model_dir, exist_ok=True)
 
         if self.trained_model is not None:
@@ -467,7 +468,7 @@ class VisionClsRunner:
         Path(report_path).write_text(md_report, encoding="utf-8")
 
     def save_model(self):
-        self.model.save_model()
+        self.pipeline.save_model()
 
     def run_all(self):
         self.run_model_train()
