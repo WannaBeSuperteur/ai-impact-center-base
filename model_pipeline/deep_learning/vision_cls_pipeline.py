@@ -207,6 +207,8 @@ class VisionClsPipeline(DeepLearningPipeline):
             val_result_detail_df = pd.DataFrame(val_result_detail_dict)
             val_result_detail_df.to_csv(self.training_options['inference_log_path'])
 
+        val_loss = float(val_loss.detach().cpu())
+
         return {'cls_report': cls_report,
                 'cf_matrix': cf_matrix,
                 'val_accuracy': val_accuracy,
@@ -230,7 +232,6 @@ class VisionClsPipeline(DeepLearningPipeline):
             self._run_train_one_epoch()
             val_result = self._run_valid_or_test_one_epoch()
             val_accuracy, val_loss = val_result['val_accuracy'], val_result['val_loss']
-            val_loss = float(val_loss.detach().cpu())
 
             print(f'epoch={current_epoch}, val_acc={val_accuracy:.6f}, val_loss={val_loss:.6f}')
 
@@ -275,7 +276,7 @@ class VisionClsPipeline(DeepLearningPipeline):
 
         test_result = self._run_valid_or_test_one_epoch(is_test=True)
         test_accuracy, test_loss = test_result['val_accuracy'], test_result['val_loss']
-        test_loss = float(test_loss.detach().cpu())
+        print(test_result)
 
         self.val_result_dict['epoch'].append('test')
         self.val_result_dict['val_acc'].append(round(test_accuracy, 4))
