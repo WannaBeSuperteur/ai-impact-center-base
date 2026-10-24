@@ -352,6 +352,8 @@ class VisionClsPipeline(DeepLearningPipeline):
         md_report += f"- train log: [{train_log_name}]({train_log_name})\n"
         md_report += f"- inference log: [{inference_log_name}]({inference_log_name})\n"
 
+        return md_report
+
     def save_model(self):
         trained_model_dir = Path(self.trained_model_save_path).parent.name
         os.makedirs(trained_model_dir, exist_ok=True)
@@ -458,7 +460,9 @@ class VisionClsRunner:
         return self.run_model_inference(img)
 
     def generate_model_test_report(self):
-        self.model.generate_test_report()
+        md_report = self.model.generate_test_report()
+        report_path = self.training_options['report_path']
+        Path(report_path).write_text(md_report, encoding="utf-8")
 
     def save_model(self):
         self.model.save_model()

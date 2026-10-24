@@ -58,6 +58,7 @@ def test_case_1():
     training_options = DEFAULT_TRAINING_OPTIONS
     training_options['train_log_path'] = '../test_cases/deep_learning_vision_cls_01/train_log.csv'
     training_options['inference_log_path'] = '../test_cases/deep_learning_vision_cls_01/inference_log.csv'
+    training_options['report_path'] = '../test_cases/deep_learning_vision_cls_01/report.md'
 
     tc1_runner = VisionClsRunner(train_data_path='../test_cases/deep_learning_vision_cls_01/archive/mnist_sample',
                                  dataset_class=DefaultClassificationDataset,
