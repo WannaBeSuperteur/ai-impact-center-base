@@ -283,7 +283,7 @@ class VisionClsPipeline(DeepLearningPipeline):
         self.val_result_dict['torch_memory'].append(torch.cuda.memory_allocated() // 1024)
         pd.DataFrame(self.val_result_dict).to_csv(self.training_options['train_log_path'])
 
-        print(test_result)
+        self.test_result = test_result
         self.trained_model = best_epoch_model
 
     def run_test(self) -> dict:
