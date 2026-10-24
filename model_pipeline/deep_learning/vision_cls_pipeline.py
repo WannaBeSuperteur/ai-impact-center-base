@@ -460,7 +460,7 @@ class VisionClsRunner:
         return self.run_model_inference(img)
 
     def generate_model_test_report(self):
-        md_report = self.model.generate_test_report()
+        md_report = self.pipeline.generate_test_report()
         report_path = self.training_options['report_path']
         Path(report_path).write_text(md_report, encoding="utf-8")
 
