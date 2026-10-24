@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Type, Callable
 
 import cv2
+import numpy as np
 import pandas as pd
 import timm
 import torch
@@ -299,9 +300,10 @@ class VisionClsPipeline(DeepLearningPipeline):
         - accuracy for all test dataset
         """
 
-        cf_matrix = np.array(result_dict['cf_matrix'])
-        total_samples = np.sum(cf_matrix)
+        cf_matrix = np.array(self.test_result['cf_matrix'])
+        num_classes = self.training_options['num_classes']
 
+        total_samples = np.sum(cf_matrix)
         total_correct = np.trace(cf_matrix)
         accuracy = total_correct / total_samples if total_samples > 0 else 0.0
 
